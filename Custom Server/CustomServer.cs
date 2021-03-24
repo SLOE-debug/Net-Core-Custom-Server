@@ -115,6 +115,8 @@ namespace Custom_Server
                 {
                     if (i != PipeEntityes.Count - 1)
                         PipeEntityes[i].Next = PipeEntityes[i + 1];
+                    else
+                        PipeEntityes[i].Next = new PipeEntity { Action = (c, p) => { return Task.CompletedTask; } };
                 }
 
             Server = ServerBuilder.SetOwinApp(OwinApp).Build();

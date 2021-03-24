@@ -35,11 +35,13 @@ namespace Custom_Server
             {
                 context.Response.Headers.Add("Content-Type", "application/json;charset=utf-8");
                 Console.WriteLine(context.Request.GetEncodedPathAndQuery());
+                await context.Response.WriteAsync("巴拉巴拉");
                 await next.Action(context, next.Next);
             })
             .UsePipe(async (context, next) =>
             {
                 await context.Response.WriteAsync("阿巴阿巴");
+                await next.Action(context, next.Next);
             })
             .Start();
         }
