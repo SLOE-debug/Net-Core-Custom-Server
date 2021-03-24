@@ -44,6 +44,8 @@ namespace Custom_Server
 
         private ServiceCollection SerCollection { get; set; }
 
+        private List<PipeEntity> PipeEntityes { get; set; } = new List<PipeEntity>();
+
         public CustomServer()
         {
             ServerBuilder = new ServerBuilder();
@@ -94,17 +96,30 @@ namespace Custom_Server
         {
             var features = new FeatureCollection(new OwinFeatureCollection(env));
             var context = DefaultHttpContextFactory.Create(features);
-            context.Response.Headers.Add("content-Type", "application/json;charset=UTF-8");
-            context.Response.WriteAsync("阿巴阿巴");
+            if (PipeEntityes.Count != 0) PipeEntityes[0].Action(context, PipeEntityes[0]?.Next);
             return Task.CompletedTask;
+        }
+
+        public CustomServer UsePipe(Func<HttpContext, PipeEntity, Task> action)
+        {
+            var pipe = new PipeEntity { Action = action };
+            PipeEntityes.Add(pipe);
+            return this;
         }
 
         public void Start()
         {
             DefaultHttpContextFactory = new DefaultHttpContextFactory(new DefaultServiceProviderFactory().CreateServiceProvider(SerCollection));
+            if (PipeEntityes.Count > 1)
+                for (int i = 0; i < PipeEntityes.Count; i++)
+                {
+                    if (i != PipeEntityes.Count - 1)
+                        PipeEntityes[i].Next = PipeEntityes[i + 1];
+                }
 
             Server = ServerBuilder.SetOwinApp(OwinApp).Build();
             Server.Start();
+
             Console.TreatControlCAsInput = false;
             while (true)
             {

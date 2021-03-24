@@ -31,6 +31,16 @@ namespace Custom_Server
             {
                 server.SetUrl(config["Host:Url"]);
             })
+            .UsePipe(async (context, next) =>
+            {
+                context.Response.Headers.Add("Content-Type", "application/json;charset=utf-8");
+                Console.WriteLine(context.Request.GetEncodedPathAndQuery());
+                await next.Action(context, next.Next);
+            })
+            .UsePipe(async (context, next) =>
+            {
+                await context.Response.WriteAsync("阿巴阿巴");
+            })
             .Start();
         }
     }
